@@ -1,9 +1,9 @@
 package com.mvc.bitcoin.service;
 
+import com.mvc.bitcoin.bean.MyWalletTransaction;
 import com.mvc.bitcoin.bean.WatchAddress;
 import com.mvc.bitcoin.mapper.MyWalletTransactionMapper;
 import com.mvc.bitcoin.mapper.WatchAddressMapper;
-import com.mvc.bitcoin.bean.MyWalletTransaction;
 import lombok.extern.java.Log;
 import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
@@ -83,13 +83,24 @@ public class BitCoinService {
      * @return
      */
     public String sendCoins(String coin, String toAddress, String pass) throws InsufficientMoneyException {
-//        Assert.isTrue(kit.wallet().checkPassword(pass), "password is wrong");
+        if (kit.wallet().isEncrypted()) {
+            Assert.isTrue(kit.wallet().checkPassword(pass), "password is wrong");
+            kit.wallet().decrypt(pass);
+        }
         log.info("send money to: " + toAddress);
         Coin value = Coin.parseCoin(coin);
         // if the wallet have more than 1 ecKey, we need to choose one for pay
         Address to = Address.fromBase58(kit.params(), toAddress);
-//        kit.wallet().decrypt(pass);
-        Wallet.SendResult result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+        Wallet.SendResult result = null;
+        try {
+            result = kit.wallet().sendCoins(kit.peerGroup(), to, value);
+        } catch (InsufficientMoneyException e) {
+            throw e;
+        } finally {
+            if (!kit.wallet().isEncrypted()) {
+                kit.wallet().encrypt(pass);
+            }
+        }
         log.info("coins sent. transaction hash: " + result.tx.getHashAsString());
         return result.tx.getHashAsString();
     }
@@ -132,13 +143,14 @@ public class BitCoinService {
     }
 
     /**
-     * init wallet with password
+     * init wallet with password. if wallet already exist, return it.
      *
      * @param pass
      */
     public String init(String pass) {
         if (kit.wallet().getImportedKeys().size() == 0) {
             ECKey ecKey = new ECKey();
+            kit.wallet().encrypt(pass);
             kit.wallet().importKeysAndEncrypt(Arrays.asList(ecKey), pass);
         }
         return address();

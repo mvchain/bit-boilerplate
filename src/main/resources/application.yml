@@ -48,6 +48,6 @@ swagger:
 
 bitcoin:
   block:
-    path: 'E:\bitblock\bitcoin-blocks\'
+    path: 'E:\bitblock\bitcoin-blocks2\'
     # testnet or publicnet
     env: testnet

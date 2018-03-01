@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.mvc.common.msg.Result;
 import com.mvc.common.msg.ResultCode;
 import lombok.extern.slf4j.Slf4j;
+import org.bitcoinj.core.InsufficientMoneyException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,7 +15,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import javax.servlet.ServletException;
@@ -58,6 +58,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
                 } else if (e instanceof BindException || e instanceof MethodArgumentNotValidException) {
                     Map<String, String> fieldErrors = getFieldErrors(e);
                     result.setCode(ResultCode.VALIDATE_ERROR).setMessage("请求参数校验不通过").setData(fieldErrors);
+                } else if (e instanceof IllegalArgumentException || e instanceof InsufficientMoneyException) {
+                    result.setCode(ResultCode.FAILURE).setMessage(e.getMessage());
                 } else {
                     result.setCode(ResultCode.INTERNAL_SERVER_ERROR)
                             .setMessage("接口 [" + request.getRequestURI() + "] 内部错误，请检查");
