@@ -30,3 +30,7 @@ The outputs are under the `target` directory.
 #### Building from an IDE
 
 Alternatively, just import the project using your IDE. [IntelliJ](http://www.jetbrains.com/idea/download/) has Maven integration built-in and has a free Community Edition. Simply use `File | Import Project` and locate the `pom.xml` in the root of the cloned project source tree.
+
+## Bitcoin
+### Change network
+Change bitcoin.block.env (in application.yml) to mainnet/testnet.
