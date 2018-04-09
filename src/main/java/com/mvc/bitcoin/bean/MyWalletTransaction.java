@@ -5,7 +5,6 @@ import lombok.Data;
 import org.apache.ibatis.type.JdbcType;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.wallet.Wallet;
-import org.springframework.context.annotation.Primary;
 import tk.mybatis.mapper.annotation.ColumnType;
 
 import javax.persistence.Id;
@@ -46,10 +45,12 @@ public class MyWalletTransaction implements Serializable {
         transaction.setFee(null == trans.getFee() ? 0 : trans.getFee().getValue());
         transaction.setValueStr(trans.getValue(wallet).toFriendlyString());
         transaction.setVersion(trans.getVersion());
+        // lamda expression, transform input streams to a list, then to a JSON string.
         String from = JSON.toJSONString(trans.getInputs().stream().map(obj -> obj.getFromAddress().toString()).collect(Collectors.toList()));
         transaction.setFromAddress(from);
         String to = JSON.toJSONString(trans.getOutputs().stream().map(obj -> obj.getAddressFromP2PKHScript(wallet.getParams()).toString()).collect(Collectors.toList()));
         transaction.setToAddress(to);
+        // conformation count
         transaction.setDepth(trans.getConfidence().getDepthInBlocks());
         transaction.setValue(trans.getValue(wallet).getValue());
         transaction.setUpdatedAt(trans.getUpdateTime());
