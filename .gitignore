@@ -27,3 +27,5 @@ mods/
 .idea/
 .DS_Store
 local.*
+
+application.yml
